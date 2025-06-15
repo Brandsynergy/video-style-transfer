@@ -199,8 +199,24 @@
                 
                 // Show success
                 loading.style.display = 'none';
-                success.style.display = 'block';
-                document.getElementById('successMessage').textContent = data.message;
+success.style.display = 'block';
+
+if (data.videoUrl) {
+    document.getElementById('successMessage').innerHTML = `
+        <p>${data.message}</p>
+        <video controls style="width: 100%; max-width: 500px; margin: 10px 0;">
+            <source src="${data.videoUrl}" type="video/mp4">
+        </video>
+        <br>
+        <a href="${data.videoUrl}" download="transformed-video.mp4" 
+           style="background: #28a745; color: white; padding: 10px 20px; 
+                  text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">
+            📥 Download Video
+        </a>
+    `;
+} else {
+    document.getElementById('successMessage').textContent = data.message || 'Processing complete!';
+}
                 
             } catch (error) {
                 loading.style.display = 'none';
