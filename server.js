@@ -17,25 +17,97 @@ app.get('/', (req, res) => {
 });
 
 // Test file upload
+// AI Processing Upload Handler
 app.post('/api/transform', upload.single('video'), async (req, res) => {
   try {
     const file = req.file;
     const style = req.body.style;
     
-    // Just tell us what we received
-    res.json({
-      success: true,
-      message: `✅ Got your file! Name: ${file.originalname}, Size: ${Math.round(file.size/1024)}KB, Style: ${style}`,
-      filename: file.originalname,
-      size: file.size,
-      style: style
-    });
+    console.log('🎨 Starting AI processing for:', file.originalname);
     
-    // Clean up the file
+    // Prepare file for AI
+    const fileBuffer = fs.readFileSync(file.path);
+    const fileBase64 = fileBuffer.toString('base64');
+    const fileDataUrl = `data:${file.mimetype};base64,${fileBase64}`;
+    
+    // Import axios here (we need it for AI calls)
+    const axios = require('axios');
+    
+    // Call AI service
+    const aiResponse = await axios.post(
+      'https://api.replicate.com/v1/predictions',
+      {
+        version: "fofr/face-to-many:35cea9c3164d9fb7fbd48b51503eabdb39c9d04fdaef9a68f368bed8087ec5f9",
+        input: {
+          image: fileDataUrl,
+          style: "Pixar style"
+        }
+      },
+      {
+        headers: {
+          'Authorization': `Token ${process.env.REPLICATE_API_TOKEN}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    console.log('🤖 AI started, waiting for result...');
+    
+    // Wait for AI to finish
+    let result = null;
+    let attempts = 0;
+    
+    while (attempts < 30) {
+      await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+      
+      const statusCheck = await axios.get(
+        `https://api.replicate.com/v1/predictions/${aiResponse.data.id}`,
+        {
+          headers: { 'Authorization': `Token ${process.env.REPLICATE_API_TOKEN}` }
+        }
+      );
+      
+      console.log('🔄 AI Status:', statusCheck.data.status);
+      
+      if (statusCheck.data.status === 'succeeded') {
+        result = statusCheck.data.output;
+        break;
+      }
+      
+      if (statusCheck.data.status === 'failed') {
+        throw new Error('AI processing failed');
+      }
+      
+      attempts++;
+    }
+    
+    // Send result
+    if (result) {
+      console.log('✅ AI Success! Result:', result);
+      res.json({
+        success: true,
+        message: '🎉 AI transformation complete!',
+        videoUrl: result,
+        originalFile: file.originalname
+      });
+    } else {
+      throw new Error('AI took too long (over 2.5 minutes)');
+    }
+    
+    // Clean up
     fs.unlinkSync(file.path);
     
   } catch (error) {
-    res.status(500).json({ error: 'Upload failed: ' + error.message });
+    console.error('❌ AI Error:', error.message);
+    
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+    
+    res.status(500).json({ 
+      error: 'AI processing failed: ' + error.message,
+      suggestion: 'Try a smaller image file (JPG/PNG under 5MB)'
+    });
   }
 });
 
