@@ -30,9 +30,6 @@ app.post('/api/transform', upload.single('video'), async (req, res) => {
     const fileBase64 = fileBuffer.toString('base64');
     const fileDataUrl = `data:${file.mimetype};base64,${fileBase64}`;
     
-    // Import axios here (we need it for AI calls)
-    const axios = require('axios');
-    
     // Call AI service
     const aiResponse = await axios.post(
       'https://api.replicate.com/v1/predictions',
@@ -58,7 +55,7 @@ app.post('/api/transform', upload.single('video'), async (req, res) => {
     let attempts = 0;
     
     while (attempts < 30) {
-      await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+      await new Promise(resolve => setTimeout(resolve, 5000));
       
       const statusCheck = await axios.get(
         `https://api.replicate.com/v1/predictions/${aiResponse.data.id}`,
@@ -109,8 +106,4 @@ app.post('/api/transform', upload.single('video'), async (req, res) => {
       suggestion: 'Try a smaller image file (JPG/PNG under 5MB)'
     });
   }
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
 });
