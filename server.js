@@ -21,17 +21,75 @@ app.post('/api/transform', upload.single('video'), async (req, res) => {
     
     console.log('🎬 Starting AI processing for:', file.originalname);
     
-    // For now, let's simulate AI processing
-    res.json({
-      success: true,
-      message: `🎉 Your ${style} style video transformation is complete!`,
-      videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", // Working sample
-      originalFile: file.originalname,
-      style: style
+    // Read the uploaded video file
+    const fs = require('fs');
+    const videoBuffer = fs.readFileSync(file.path);
+    const videoBase64 = videoBuffer.toString('base64');
+    const videoDataUrl = `data:${file.mimetype};base64,${videoBase64}`;
+    
+    // AI Style mapping
+    const stylePrompts = {
+      pixar: "Transform this video into Pixar animation style with vibrant colors, smooth 3D rendering, and cartoon-like characters",
+      ghibli: "Transform this video into Studio Ghibli anime style with hand-drawn animation, soft colors, and magical atmosphere",
+      anime: "Transform this video into modern anime style with bold colors, dramatic lighting, and manga-inspired character design"
+    };
+    
+    // Call Replicate AI
+    const response = await fetch('https://api.replicate.com/v1/predictions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Token ${process.env.REPLICATE_API_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        version: "435061a1b5a4c1e26740464bf786efdfa9cb3a3ac488595a2de23e143fdb0117",
+        input: {
+          video: videoDataUrl,
+          prompt: stylePrompts[style] || stylePrompts.pixar,
+          num_frames: 16,
+          num_inference_steps: 20
+        }
+      })
     });
     
+    const prediction = await response.json();
+    
+    if (prediction.error) {
+      throw new Error(prediction.error);
+    }
+    
+    // Wait for processing to complete
+    let result = prediction;
+    while (result.status === 'starting' || result.status === 'processing') {
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+      
+      const statusResponse = await fetch(`https://api.replicate.com/v1/predictions/${result.id}`, {
+        headers: {
+          'Authorization': `Token ${process.env.REPLICATE_API_TOKEN}`,
+        }
+      });
+      
+      result = await statusResponse.json();
+    }
+    
+    if (result.status === 'succeeded' && result.output) {
+      res.json({
+        success: true,
+        message: `🎉 Your ${style} style video transformation is complete!`,
+        videoUrl: result.output,
+        originalFile: file.originalname,
+        style: style
+      });
+    } else {
+      throw new Error('AI processing failed: ' + (result.error || 'Unknown error'));
+    }
+    
   } catch (error) {
-    res.status(500).json({ error: 'Processing failed: ' + error.message });
+    console.error('Processing error:', error);
+    res.status(500).json({ 
+      error: 'Processing failed: ' + error.message,
+      success: false 
+    });
   }
 });
 
