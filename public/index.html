@@ -50,6 +50,19 @@
     </form>
 
     <div id="result" style="margin-top: 30px;"></div>
+<div id="videoPlayer" style="margin-top: 20px; display: none;">
+    <h3>🎬 Your Transformed Video:</h3>
+    <video controls width="600" style="max-width: 100%;">
+        <source id="videoSource" src="" type="video/mp4">
+        Your browser doesn't support video playback.
+    </video>
+    <br><br>
+    <a id="downloadLink" href="" download>
+        <button style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px;">
+            📥 Download Video
+        </button>
+    </a>
+</div>
 
     <script>
         function showFileName() {
