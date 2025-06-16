@@ -63,15 +63,13 @@ const response = await fetch('https://api.replicate.com/v1/predictions', {
     'Content-Type': 'application/json',
   },
   body: JSON.stringify({
-    version: "25435295-3d5a-4f3c-bf19-8b1b4b2b0c4f",
+    version: "435061a1b5a4c1e26740464bf786efdfa9cb3a3ac488595a2de23e143fdb0117",
     input: {
-      video: videoDataUrl,
-      prompt: stylePrompts[style] || stylePrompts.pixar,
-      strength: 0.8,
-      num_inference_steps: 25,
-      guidance_scale: 7.5,
-      fps: 8
-    }
+  video: videoDataUrl,
+  prompt: stylePrompts[style] || stylePrompts.pixar,
+  num_frames: 16,
+  num_inference_steps: 20
+}
   })
 });
   
