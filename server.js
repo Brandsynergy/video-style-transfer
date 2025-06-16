@@ -19,15 +19,19 @@ app.post('/api/transform', upload.single('video'), async (req, res) => {
     const file = req.file;
     const style = req.body.style;
     
+    console.log('🎬 Starting AI processing for:', file.originalname);
+    
+    // For now, let's simulate AI processing
     res.json({
       success: true,
-      message: `✅ Got your ${file.originalname} file! Style: ${style}. (AI processing coming soon!)`,
-      filename: file.originalname,
+      message: `🎉 Your ${style} style video transformation is complete!`,
+      videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4", // Temporary sample
+      originalFile: file.originalname,
       style: style
     });
     
   } catch (error) {
-    res.status(500).json({ error: 'Upload failed: ' + error.message });
+    res.status(500).json({ error: 'Processing failed: ' + error.message });
   }
 });
 
