@@ -103,6 +103,19 @@
                 
                 if (data.success) {
                     result.innerHTML = `<h3>✅ ${data.message}</h3>`;
+
+if (data.videoUrl) {
+    const videoPlayer = document.getElementById('videoPlayer');
+    const videoSource = document.getElementById('videoSource');
+    const downloadLink = document.getElementById('downloadLink');
+    
+    videoSource.src = data.videoUrl;
+    downloadLink.href = data.videoUrl;
+    videoPlayer.style.display = 'block';
+    
+    // Reload the video
+    videoPlayer.querySelector('video').load();
+}
                 } else {
                     result.innerHTML = `<h3>❌ Error: ${data.error}</h3>`;
                 }
