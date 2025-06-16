@@ -1,256 +1,110 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Video Style Transfer</title>
+    <title>Video Style Transformer</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .upload-area {
-            border: 3px dashed #ccc;
-            border-radius: 10px;
-            padding: 40px;
-            text-align: center;
-            margin: 20px 0;
+        body { font-family: Arial; padding: 20px; text-align: center; }
+        .upload-area { 
+            border: 2px dashed #ccc; 
+            padding: 50px; 
+            margin: 20px 0; 
             cursor: pointer;
-            transition: all 0.3s;
+            background: #f9f9f9;
         }
-        .upload-area:hover {
-            border-color: #667eea;
-            background: #f8f9ff;
-        }
-        .upload-area.dragover {
-            border-color: #667eea;
-            background: #f0f8ff;
-        }
-        input[type="file"] {
-            display: none;
-        }
-        select, button {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+        .upload-area:hover { background: #f0f0f0; }
+        button { 
+            background: #007bff; 
+            color: white; 
+            padding: 15px 30px; 
+            border: none; 
+            border-radius: 5px; 
             font-size: 16px;
-        }
-        button {
-            background: #667eea;
-            color: white;
-            border: none;
             cursor: pointer;
-            font-weight: bold;
         }
-        button:hover {
-            background: #5a6fd8;
-        }
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        .result {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f0f8ff;
-            border-radius: 10px;
-            display: none;
-        }
-        .loading {
-            text-align: center;
-            padding: 20px;
-        }
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        #fileInput { display: none; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎬 AI Video Style Transfer</h1>
-        <p style="text-align: center; color: #666;">Transform your videos into Pixar, Ghibli, or Anime style!</p>
-        
-        <form id="uploadForm">
-            <label for="style">Choose your style:</label>
-            <select id="style" name="style">
-                <option value="pixar">🏰 Pixar Style</option>
-                <option value="ghibli">🌸 Studio Ghibli</option>
-                <option value="anime">⚡ Anime Style</option>
-            </select>
-            
-            <div class="upload-area" id="uploadArea">
-                <input type="file" id="videoFile" accept="video/*" required>
-                <div id="uploadText">
-                    <h3>📁 Click here or drag your video</h3>
-                    <p>Maximum 2 minutes, up to 100MB</p>
-                    <p>Supported: MP4, MOV, AVI</p>
-                </div>
-            </div>
-            
-            <button type="submit" id="submitBtn">✨ Transform My Video!</button>
-        </form>
-        
-        <div id="result" class="result">
-            <div id="loading" class="loading" style="display: none;">
-                <div class="spinner"></div>
-                <p>🎨 AI is working its magic... This may take a few minutes!</p>
-            </div>
-            <div id="success" style="display: none;">
-                <h3>🎉 Success!</h3>
-                <p id="successMessage"></p>
-            </div>
+    <h1>🎬 Video Style Transformer</h1>
+    <p>Transform your videos into Pixar, Ghibli, or Anime styles!</p>
+
+    <form id="uploadForm">
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <h3>📁 Click Here to Upload Video</h3>
+            <p>Maximum 2 minutes, up to 100MB</p>
         </div>
-    </div>
+        
+        <input type="file" id="fileInput" accept="video/*" onchange="showFileName()">
+        
+        <div id="fileInfo" style="display:none; margin: 20px 0;">
+            <strong>Selected: </strong><span id="fileName"></span>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <label><input type="radio" name="style" value="pixar" checked> 🏰 Pixar</label>
+            <label><input type="radio" name="style" value="ghibli"> 🌸 Ghibli</label>
+            <label><input type="radio" name="style" value="anime"> ⚡ Anime</label>
+        </div>
+
+        <button type="submit">🎨 Transform My Video!</button>
+    </form>
+
+    <div id="result" style="margin-top: 30px;"></div>
 
     <script>
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('videoFile');
-        const uploadText = document.getElementById('uploadText');
-        const form = document.getElementById('uploadForm');
-        const result = document.getElementById('result');
-        const loading = document.getElementById('loading');
-        const success = document.getElementById('success');
-        const submitBtn = document.getElementById('submitBtn');
-
-        // Make upload area clickable
-        uploadArea.addEventListener('click', () => fileInput.click());
-
-        // Handle file selection
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                uploadText.innerHTML = `
-                    <h3>✅ ${file.name}</h3>
-                    <p>Size: ${(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                    <p>Click to change file</p>
-                `;
+        function showFileName() {
+            const fileInput = document.getElementById('fileInput');
+            const fileName = document.getElementById('fileName');
+            const fileInfo = document.getElementById('fileInfo');
+            
+            if (fileInput.files.length > 0) {
+                fileName.textContent = fileInput.files[0].name;
+                fileInfo.style.display = 'block';
             }
-        });
+        }
 
-        // Handle drag and drop
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
-
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
-
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                fileInput.files = files;
-                fileInput.dispatchEvent(new Event('change'));
-            }
-        });
-
-        // Handle form submission
-        form.addEventListener('submit', async (e) => {
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            const fileInput = document.getElementById('fileInput');
+            const result = document.getElementById('result');
+            
+            if (!fileInput.files[0]) {
+                alert('Please select a video file first!');
+                return;
+            }
+
             const formData = new FormData();
             formData.append('video', fileInput.files[0]);
-            formData.append('style', document.getElementById('style').value);
-            
-            // Show loading
-            result.style.display = 'block';
-            loading.style.display = 'block';
-            success.style.display = 'none';
-            submitBtn.disabled = true;
-            submitBtn.textContent = '🎨 Processing...';
-            
+            formData.append('style', document.querySelector('input[name="style"]:checked').value);
+
+            result.innerHTML = '<h3>🎨 Processing your video...</h3><p>Please wait...</p>';
+
             try {
                 const response = await fetch('/api/transform', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const data = await response.json();
                 
-                // Show success
-                loading.style.display = 'none';
-success.style.display = 'block';
-
-console.log('Response from server:', data);
-
-if (data.success && data.videoUrl) {
-    document.getElementById('successMessage').innerHTML = `
-        <h3>🎉 ${data.message}</h3>
-        <p><strong>Original:</strong> ${data.originalFile}</p>
-        <p><strong>Style:</strong> ${data.style}</p>
-        
-        <div style="margin: 20px 0;">
-            <video controls style="width: 100%; max-width: 600px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
-                <source src="${data.videoUrl}" type="video/mp4">
-                Your browser doesn't support video playback.
-            </video>
-        </div>
-        
-        <a href="${data.videoUrl}" download="transformed-${data.style}-video.mp4" 
-           style="background: #28a745; color: white; padding: 12px 24px; 
-                  text-decoration: none; border-radius: 8px; display: inline-block; 
-                  margin-top: 15px; font-weight: bold;">
-            📥 Download Your ${data.style} Video
-        </a>
-    `;
-} else if (data.error) {
-    document.getElementById('successMessage').innerHTML = `
-        <h3>❌ Oops! Something went wrong</h3>
-        <p><strong>Error:</strong> ${data.error}</p>
-        <p><strong>Suggestion:</strong> ${data.suggestion || 'Try a shorter video'}</p>
-    `;
-} else {
-    document.getElementById('successMessage').textContent = data.message || 'Processing complete!';
-}
-        <a href="${data.videoUrl}" download="transformed-video.mp4" 
-           style="background: #28a745; color: white; padding: 10px 20px; 
-                  text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">
-            📥 Download Video
-        </a>
-    `;
-} else {
-    document.getElementById('successMessage').textContent = data.message || 'Processing complete!';
-}
-                
+                if (data.success) {
+                    result.innerHTML = `<h3>✅ ${data.message}</h3>`;
+                } else {
+                    result.innerHTML = `<h3>❌ Error: ${data.error}</h3>`;
+                }
             } catch (error) {
-                loading.style.display = 'none';
-                success.style.display = 'block';
-                document.getElementById('successMessage').textContent = 'Oops! Something went wrong. Please try again.';
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = '✨ Transform My Video!';
+                result.innerHTML = `<h3>❌ Error: ${error.message}</h3>`;
             }
         });
     </script>
 </body>
-</html>
+</html>                                                                                                                                                                
+  
+  
+  
+  
+  
+  
+  
+  
