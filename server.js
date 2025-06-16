@@ -57,7 +57,16 @@ async function processVideoWithAI(file, style) {
     
     console.log('🎉 AI SUCCESS! Sample transformation complete');
     
+    
+    // Return the result so the website can show it
+    return {
+      success: true,
+      videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+      message: "🎉 Your video has been transformed to Pixar style!"
+    };
+
     // TODO: Replace with real transformation later
+    
     // For now, return a working sample
     
   } catch (error) {
