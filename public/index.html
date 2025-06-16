@@ -201,13 +201,37 @@
                 loading.style.display = 'none';
 success.style.display = 'block';
 
-if (data.videoUrl) {
+console.log('Response from server:', data);
+
+if (data.success && data.videoUrl) {
     document.getElementById('successMessage').innerHTML = `
-        <p>${data.message}</p>
-        <video controls style="width: 100%; max-width: 500px; margin: 10px 0;">
-            <source src="${data.videoUrl}" type="video/mp4">
-        </video>
-        <br>
+        <h3>🎉 ${data.message}</h3>
+        <p><strong>Original:</strong> ${data.originalFile}</p>
+        <p><strong>Style:</strong> ${data.style}</p>
+        
+        <div style="margin: 20px 0;">
+            <video controls style="width: 100%; max-width: 600px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+                <source src="${data.videoUrl}" type="video/mp4">
+                Your browser doesn't support video playback.
+            </video>
+        </div>
+        
+        <a href="${data.videoUrl}" download="transformed-${data.style}-video.mp4" 
+           style="background: #28a745; color: white; padding: 12px 24px; 
+                  text-decoration: none; border-radius: 8px; display: inline-block; 
+                  margin-top: 15px; font-weight: bold;">
+            📥 Download Your ${data.style} Video
+        </a>
+    `;
+} else if (data.error) {
+    document.getElementById('successMessage').innerHTML = `
+        <h3>❌ Oops! Something went wrong</h3>
+        <p><strong>Error:</strong> ${data.error}</p>
+        <p><strong>Suggestion:</strong> ${data.suggestion || 'Try a shorter video'}</p>
+    `;
+} else {
+    document.getElementById('successMessage').textContent = data.message || 'Processing complete!';
+}
         <a href="${data.videoUrl}" download="transformed-video.mp4" 
            style="background: #28a745; color: white; padding: 10px 20px; 
                   text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px;">
