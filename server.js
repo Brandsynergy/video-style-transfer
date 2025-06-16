@@ -42,22 +42,55 @@ app.post('/api/transform', upload.single('video'), async (req, res) => {
 async function processVideoWithAI(file, style) {
   try {
     console.log('🤖 Calling Replicate AI...');
-    
-    const response = await fetch('https://api.replicate.com/v1/predictions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Token ${process.env.REPLICATE_API_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        version: "9f747673945c62801b13b84701c783929c0ee784e4748ec062204894dda1a351",
-        input: {
-          video: `https://video-style-transfer.onrender.com/uploads/${file.filename}`,
-          prompt: `Transform this video into ${style} animation style`,
-          num_inference_steps: 20
-        }
-      })
-    });
+
+// First, we need to make the video file publicly accessible
+const fs = require('fs');
+const videoBuffer = fs.readFileSync(file.path);
+const videoBase64 = videoBuffer.toString('base64');
+const videoDataUrl = `data:${file.mimetype};base64,${videoBase64}`;
+
+// Style-specific prompts
+const stylePrompts = {
+  pixar: "Transform this video into Pixar 3D animation style with vibrant colors, smooth rendering, cartoon characters, and Disney-like magical atmosphere",
+  ghibli: "Transform this video into Studio Ghibli anime style with hand-drawn animation, soft watercolor textures, magical forest atmosphere, and Miyazaki-inspired character design",
+  anime: "Transform this video into modern anime style with bold colors, dramatic lighting, manga-inspired character design, and Japanese animation aesthetics"
+};
+
+const response = await fetch('https://api.replicate.com/v1/predictions', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Token ${process.env.REPLICATE_API_TOKEN}`,
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    version: "25435295-3d5a-4f3c-bf19-8b1b4b2b0c4f",
+    input: {
+      video: videoDataUrl,
+      prompt: stylePrompts[style] || stylePrompts.pixar,
+      strength: 0.8,
+      num_inference_steps: 25,
+      guidance_scale: 7.5,
+      fps: 8
+    }
+  })
+});
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
     
     const prediction = await response.json();
     console.log('🎯 AI Started:', prediction.id);
