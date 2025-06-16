@@ -114,6 +114,12 @@
                 if (data.success) {
                     result.innerHTML = `<h3>✅ ${data.message}</h3>`;
 
+if (data.processing) {
+    // Show progress bar
+    document.getElementById('progressContainer').style.display = 'block';
+    startProgressTracking();
+}
+
 if (data.videoUrl) {
     const videoPlayer = document.getElementById('videoPlayer');
     const videoSource = document.getElementById('videoSource');
@@ -133,6 +139,40 @@ if (data.videoUrl) {
                 result.innerHTML = `<h3>❌ Error: ${error.message}</h3>`;
             }
         });
+        function startProgressTracking() {
+    let progress = 0;
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const progressStatus = document.getElementById('progressStatus');
+    
+    const messages = [
+        "🚀 Starting AI transformation...",
+        "🎬 Analyzing your video...",
+        "🎨 Applying Pixar magic...",
+        "✨ Adding animation effects...",
+        "🎭 Perfecting the style...",
+        "🎉 Almost done..."
+    ];
+    
+    const interval = setInterval(() => {
+        progress += Math.random() * 15 + 5;
+        
+        if (progress > 95) progress = 95;
+        
+        progressBar.style.width = progress + '%';
+        progressText.textContent = Math.round(progress) + '%';
+        
+        const messageIndex = Math.floor((progress / 100) * messages.length);
+        if (messageIndex < messages.length) {
+            progressStatus.textContent = messages[messageIndex];
+        }
+        
+        if (progress >= 95) {
+            clearInterval(interval);
+            progressStatus.textContent = "🔄 Finalizing your transformed video...";
+        }
+    }, 2000);
+}
     </script>
 </body>
 </html>                                                                                                                                                                
