@@ -21,7 +21,219 @@ app.post('/api/transform', upload.single('video'), async (req, res) => {
     
     console.log('🎬 Starting AI transformation for:', file.originalname);
     
-    // Show processing message first
+    // Show processing message first                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                                                              
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
     res.json({
       success: true,
       message: `🎨 AI is transforming your video to ${style} style... This may take 2-3 minutes.`,
@@ -30,8 +242,26 @@ app.post('/api/transform', upload.single('video'), async (req, res) => {
       style: style
     });
     
-    // Start AI processing in background
-    processVideoWithAI(file, style);
+    // Process with AI and wait for result
+const result = await processVideoWithAI(file, style);
+
+// Send back the final result
+if (result && result.success) {
+  res.json({
+    success: true,
+    message: result.message,
+    videoUrl: result.videoUrl,
+    processing: false
+  });
+} else {
+  res.json({
+    success: false,
+    message: "❌ Transformation failed. Please try again.",
+    processing: false
+  });
+}
+
+// Remove the old res.json above (lines 25-31)
     
   } catch (error) {
     res.status(500).json({ error: 'Upload failed: ' + error.message });
