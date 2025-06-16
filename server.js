@@ -52,7 +52,7 @@ async function processVideoWithAI(file, style) {
       body: JSON.stringify({
         version: "9f747673945c62801b13b84701c783929c0ee784e4748ec062204894dda1a351",
         input: {
-          video: `https://your-app-url.onrender.com/uploads/${file.filename}`,
+          video: `https://video-style-transfer.onrender.com/uploads/${file.filename}`,
           prompt: `Transform this video into ${style} animation style`,
           num_inference_steps: 20
         }
@@ -60,12 +60,40 @@ async function processVideoWithAI(file, style) {
     });
     
     const prediction = await response.json();
-    console.log('🎯 AI Response:', prediction);
+    console.log('🎯 AI Started:', prediction.id);
+    
+    // Wait for completion
+    let result = prediction;
+    while (result.status === 'starting' || result.status === 'processing') {
+      console.log('⏳ AI Status:', result.status);
+      await new Promise(resolve => setTimeout(resolve, 10000)); // Wait 10 seconds
+      
+      const statusResponse = await fetch(`https://api.replicate.com/v1/predictions/${result.id}`, {
+        headers: {
+          'Authorization': `Token ${process.env.REPLICATE_API_TOKEN}`,
+        }
+      });
+      
+      result = await statusResponse.json();
+    }
+    
+    if (result.status === 'succeeded') {
+      console.log('🎉 AI SUCCESS! Video URL:', result.output);
+    } else {
+      console.log('❌ AI FAILED:', result.error);
+    }
     
   } catch (error) {
     console.error('❌ AI Error:', error);
   }
-}                                                                                                                                                                                    
+}                    
+                      
+                      
+                      
+                      
+                      
+                      
+                                                                                                                                                                                      
   
   
   
