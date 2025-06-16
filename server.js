@@ -25,7 +25,7 @@ app.post('/api/transform', upload.single('video'), async (req, res) => {
     res.json({
       success: true,
       message: `🎉 Your ${style} style video transformation is complete!`,
-      videoUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4", // Temporary sample
+      videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", // Working sample
       originalFile: file.originalname,
       style: style
     });
