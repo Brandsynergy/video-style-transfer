@@ -54,38 +54,63 @@ if (result && result.success) {
 // AI Processing Function
 async function processVideoWithAI(file, style) {
   try {
-    console.log('🤖 Starting simple AI transformation...');
+    console.log(`🎬 Starting REAL AI transformation for: ${file.originalname}`);
     
-    // For now, let's use a working sample transformation
-    // This proves the concept works, then we can improve it
+    // Upload file to a temporary URL for AI to access
+    const fs = require('fs');
+    const fileBuffer = fs.readFileSync(file.path);
+    const fileBase64 = fileBuffer.toString('base64');
     
-    const sampleTransformations = {
-      pixar: "https://replicate.delivery/pbxt/IJH8I9H9H9H9H9H9H9H9H9H9H9H9H9H9H9H9H9H9H9H9/pixar-sample.mp4",
-      ghibli: "https://replicate.delivery/pbxt/KJI9J9J9J9J9J9J9J9J9J9J9J9J9J9J9J9J9J9J9J9J9/ghibli-sample.mp4", 
-      anime: "https://replicate.delivery/pbxt/LKJ0K0K0K0K0K0K0K0K0K0K0K0K0K0K0K0K0K0K0K0K0/anime-sample.mp4"
-    };
+    // Real AI transformation using Replicate
+    const replicate = new Replicate({
+      auth: process.env.REPLICATE_API_TOKEN,
+    });
     
-    // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+    console.log('🤖 Calling REAL AI for video transformation...');
     
-    console.log('🎉 AI SUCCESS! Sample transformation complete');
+    const output = await replicate.run(
+      "lucataco/animate-diff:beecf59c4aee8d81bf04f0381033dfa10dc16e845b83c17a580e8c17bd4c6e10",
+      {
+        input: {
+          path: `data:video/mp4;base64,${fileBase64}`,
+          motion_module: "mm_sd_v14",
+          prompt: `Transform this video to ${style} animation style, high quality, detailed`,
+          n_prompt: "low quality, blurry, distorted",
+          steps: 25,
+          guidance_scale: 7.5
+        }
+      }
+    );
+
+    console.log('🎉 REAL AI SUCCESS! Your video is transformed!');
     
-    
-    // Return the result so the website can show it
     return {
       success: true,
-      videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-      message: "🎉 Your video has been transformed to Pixar style!"
+      videoUrl: output,
+      message: `🎉 Your video has been transformed to ${style} style!`
     };
 
-    // TODO: Replace with real transformation later
-    
-    // For now, return a working sample
-    
   } catch (error) {
-    console.error('❌ AI Error:', error);
+    console.error('❌ AI transformation failed:', error);
+    return {
+      success: false,
+      message: "❌ Transformation failed. Please try a shorter video (under 10 seconds)."
+    };
   }
-}                                                                                                                                                                                   
+}                    
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                      
+                                                                                                                                                                                     
   
   
   
